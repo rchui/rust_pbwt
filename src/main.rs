@@ -186,3 +186,53 @@ fn main() {
     };
     println!("{:?}", results);
 }
+
+#[cfg(test)]
+mod test {
+    #[test]
+    fn test_pbwt_integration() {
+        use main;
+
+        main();
+        assert!(true);
+    }
+
+    #[test]
+    fn test_pbwt() {
+        use pbwt;
+
+        const N_HAPLOTYPES: usize = 8;
+        const N_VARIANTS: usize = 6;
+        const MIN_LENGTH: usize = 3;
+        let data = vec![0, 1, 0, 1, 0, 1,
+                        1, 1, 0, 0, 0, 1,
+                        1, 1, 1, 1, 1, 1,
+                        0, 1, 1, 1, 1, 0,
+                        0, 0, 0, 0, 0, 0,
+                        1, 0, 0, 0, 1, 0,
+                        1, 1, 0, 0, 0, 1,
+                        0, 1, 0, 1, 1, 0];
+
+        assert_eq!(data.len(), N_HAPLOTYPES * N_VARIANTS);
+
+        let results = pbwt(&N_HAPLOTYPES, &N_VARIANTS, &data, &MIN_LENGTH);
+        let target = vec![[4, 4, 5], [4, 0, 7], [5, 4, 1], [5, 4, 6], [5, 3, 2]];
+
+        assert_eq!(target, results);
+    }
+
+    #[test]
+    fn test_counting_sort() {
+        use counting_sort;
+
+        const N_HAPLOTYPES: usize = 8;
+        let data = vec![[4, 4, 5], [4, 0, 7], [5, 4, 1], [5, 4, 6], [5, 3, 2]];
+        let results = match counting_sort(data, &N_HAPLOTYPES) {
+            Ok(ok) => ok,
+            Err(err) => panic!("{:?}", err)
+        };
+        let target = vec![[4, 0, 7], [5, 3, 2], [5, 4, 1], [4, 4, 5], [5, 4, 6]];
+
+        assert_eq!(target, results);
+    }
+}
