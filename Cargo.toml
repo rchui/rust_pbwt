@@ -1,0 +1,6 @@
+[package]
+name = "rust_pbwt"
+version = "0.1.0"
+authors = ["Ryan Chui <ryanc@23andme.com>"]
+
+[dependencies]
