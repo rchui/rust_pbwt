@@ -99,19 +99,21 @@ fn counting_sort(pbwt_results: Vec<[usize; 3]>, n_haplotypes: &usize) -> Result<
     }
 
     let mut start = 0;
-    let mut current: isize = -1;
+    let mut current: Option<usize>;
     
     if count_1_results.len() > 0 {
-        current = count_1_results[0][1] as isize;
+        current = Some(count_1_results[0][1]);
     } else {
         return Err(String::from("No counting sort results."));
     }
 
-    if current >= 0 {
+    let mut count_2_slice: Vec<[usize; 3]>;
+    let mut count_2_slice_results: Vec<[usize; 3]>;
+
+    if current.is_some() {
         for i in 0..count_1_results.len() {
-            if current != count_1_results[i][1] as isize {
-                let count_2_slice = count_1_results[start..i].to_vec();
-                let count_2_slice_results: Vec<[usize; 3]>;
+            if current.unwrap() != count_1_results[i][1] {
+                count_2_slice = count_1_results[start..i].to_vec();
 
                 if count_2_slice.len() > 1 {
                     count_2_slice_results = counting_sub_sort(count_2_slice, &n_haplotypes, 2);
@@ -119,14 +121,13 @@ fn counting_sort(pbwt_results: Vec<[usize; 3]>, n_haplotypes: &usize) -> Result<
                 }
 
                 start = i;
-                current = count_1_results[i][1] as isize;
+                current = Some(count_1_results[i][1]);
             }
         }
 
         if start != count_1_results.len() - 1 {
             let end_index = count_1_results.len();
-            let count_2_slice = count_1_results[start..end_index].to_vec();
-            let count_2_slice_results: Vec<[usize; 3]>;
+            count_2_slice = count_1_results[start..end_index].to_vec();
 
             if count_2_slice.len() > 1 {
                 count_2_slice_results = counting_sub_sort(count_2_slice, &n_haplotypes, 2);
@@ -134,7 +135,7 @@ fn counting_sort(pbwt_results: Vec<[usize; 3]>, n_haplotypes: &usize) -> Result<
             }
         }
     } else {
-        return Err(format!("Invalid current value: {}", current));
+        return Err(format!("Invalid current value: {}", current.unwrap()));
     }
     Ok(count_1_results)
 }
@@ -160,8 +161,8 @@ fn counting_sub_sort(pbwt_results: Vec<[usize; 3]>, n_haplotypes: &usize, pair_i
 }
 
 fn main() {
-    let n_haplotypes = 8;
-    let n_variants = 6;
+    const N_HAPLOTYPES: usize = 8;
+    const N_VARIANTS: usize = 6;
     let data = vec![0, 1, 0, 1, 0, 1,
                     1, 1, 0, 0, 0, 1,
                     1, 1, 1, 1, 1, 1,
@@ -170,16 +171,16 @@ fn main() {
                     1, 0, 0, 0, 1, 0,
                     1, 1, 0, 0, 0, 1,
                     0, 1, 0, 1, 1, 0];
-    let min_length = 3;
+    const MIN_LENGTH: usize = 3;
 
-    if n_haplotypes * n_variants != data.len() {
-        panic!("Dimensions mismatch: haplotypes: {}, variants: {}, data: {}", n_haplotypes, n_variants, data.len());
+    if N_HAPLOTYPES * N_VARIANTS != data.len() {
+        panic!("Dimensions mismatch: haplotypes: {}, variants: {}, data: {}", N_HAPLOTYPES, N_VARIANTS, data.len());
     }
 
-    print_data(&n_haplotypes, &n_variants, &data);
-    let mut results = pbwt(&n_haplotypes, &n_variants, &data, &min_length);
+    print_data(&N_HAPLOTYPES, &N_VARIANTS, &data);
+    let mut results = pbwt(&N_HAPLOTYPES, &N_VARIANTS, &data, &MIN_LENGTH);
     println!("{:?}", results);
-    results = match counting_sort(results, &n_haplotypes) {
+    results = match counting_sort(results, &N_HAPLOTYPES) {
         Ok(ok) => ok,
         Err(err) => panic!("{:?}", err)
     };
